@@ -1,0 +1,55 @@
+datasource db {
+    url      = env("DATABASE_URL")
+    provider = "postgresql"
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+model User {
+    id       String @id @default(uuid()) @db.Uuid
+    email    String @unique
+    password String
+
+    @@map("users")
+}
+
+model Pokemon {
+    id          Int     @id @default(autoincrement())
+    name        String  @unique
+    typeOne     TYPE    @map("type_one")
+    typeTwo     TYPE?   @map("type_two")
+    total       Int
+    hp          Int
+    attack      Int
+    defense     Int
+    spAtk       Int     @map("sp_atk")
+    spDef       Int     @map("sp_def")
+    speed       Int
+    generation  Int
+    isLegendary Boolean @default(false) @map("is_legendary")
+
+    @@map("pokemons")
+}
+
+enum TYPE {
+    GRASS
+    FIRE
+    WATER
+    BUG
+    NORMAL
+    POISON
+    ELECTRIC
+    GROUND
+    FAIRY
+    FIGHTING
+    PSYCHIC
+    ROCK
+    GHOST
+    ICE
+    DRAGON
+    DARK
+    STEEL
+    FLYING
+}
