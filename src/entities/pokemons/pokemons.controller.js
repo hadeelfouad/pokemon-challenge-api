@@ -32,7 +32,7 @@ export class PokemonController {
 
   @Get(':id')
   @Bind(Param('id', ParseIntPipe))
-  FindUnique(id) {
+  findUnique(id) {
     return this.pokemonService.findUnique(id);
   }
 
@@ -47,7 +47,7 @@ export class PokemonController {
     Query('page', new DefaultValuePipe('1'), ParseIntPipe),
     Query('limit', new DefaultValuePipe('10'), ParseIntPipe),
   )
-  FindMany(page, limit) {
+  findMany(page, limit) {
     return this.pokemonService.findMany(page, limit);
   }
 }

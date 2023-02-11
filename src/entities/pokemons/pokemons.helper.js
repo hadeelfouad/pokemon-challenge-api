@@ -1,4 +1,4 @@
-import { converge, curry, identity, path, pluck, zipObj } from 'ramda';
+import { converge, identity, pluck, zipObj } from 'ramda';
 export const getTypeModifier = (atkType, defType) => {
   const modifiers = {
     ELECTRIC: {
@@ -10,9 +10,3 @@ export const getTypeModifier = (atkType, defType) => {
 };
 
 export const createDetailsObject = converge(zipObj, [pluck('id'), identity]);
-export const getPossibleDamage = curry((atkId, defId, pokemons) =>
-  converge(getTypeModifier, [
-    path([atkId, 'typeOne']),
-    path([defId, 'typeOne']),
-  ])(pokemons),
-);
