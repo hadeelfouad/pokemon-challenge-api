@@ -42,14 +42,17 @@ const readCsvFile = async () => {
   return records;
 };
 
-const seedDatabase = (prisma, records) =>
-  prisma.Pokemon.createMany({ data: records });
+const createPokemons = (prisma, data) => prisma.Pokemon.createMany({ data });
+const createUser = prisma =>
+  prisma.user.create({
+    data: { email: 'user@test.com', password: 'password' },
+  });
 
 const main = async () => {
   const records = await readCsvFile();
   const prisma = new PrismaClient();
 
-  return seedDatabase(prisma, records);
+  return Promise.all([createPokemons(prisma, records), createUser(prisma)]);
 };
 
 main()

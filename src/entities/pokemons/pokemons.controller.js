@@ -9,12 +9,15 @@ import {
   ParseIntPipe,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { PokemonService } from './pokemons.service';
 import { UpdatePokemonSchema } from './pokemons.schema';
 import { JoiValidationPipe } from '../../common/pipes/joi';
+import { JwtAuthGuard } from '../../guards/jwt.guard';
 
 @Controller('pokemons')
+@UseGuards(JwtAuthGuard)
 @Dependencies(PokemonService)
 export class PokemonController {
   constructor(pokemonService) {
