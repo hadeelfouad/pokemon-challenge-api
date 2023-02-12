@@ -1,6 +1,7 @@
 import { Dependencies, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../providers/prisma/prisma.service';
 import { createDetailsObject } from './pokemons.helper';
+import { assoc, pipe, pluck, sort, splitEvery, map } from 'ramda';
 
 @Injectable()
 @Dependencies(PrismaService)
@@ -31,11 +32,16 @@ export class PokemonService {
     });
   }
 
-  async getDamage(atkId, defId) {
-    const pokemons = await this.findByIds([atkId, defId]);
+  async getDamage(attackerId, defenderId) {
+    const pokemons = await this.findByIds([attackerId, defenderId]);
     const details = createDetailsObject(pokemons);
-    const { typeOne: atkType, attack } = details[atkId];
-    const { typeOne: defType, defense } = details[defId];
+
+    return this.#possibleDamage(details[attackerId], details[defenderId]);
+  }
+
+  #possibleDamage(attacker, defender) {
+    const { typeOne: atkType, attack } = attacker;
+    const { typeOne: defType, defense } = defender;
     const typeModifier = this.#getTypeModifier(atkType, defType);
 
     return 30 * (attack / defense) * typeModifier;
@@ -49,5 +55,53 @@ export class PokemonService {
       },
     };
     return modifiers[atkType]?.[defType] || 1;
+  }
+
+  async ringFight(ids) {
+    let pokemons = await this.findByIds(ids);
+    const details = createDetailsObject(pokemons);
+    let round = pokemons.length;
+    const results = {};
+    do {
+      const roundOutCome = this.#getRoundOutCome(pokemons);
+      results[round] = roundOutCome;
+      const winnersIds = pluck('winnerId', roundOutCome);
+      pokemons = map(id => details[id], winnersIds);
+      round = pokemons.length;
+    } while (pokemons.length > 1);
+    return results;
+  }
+
+  #fightOutcome(attacker, defender) {
+    const damage = this.#possibleDamage(attacker, defender);
+    const { hp: defenderHp } = defender;
+    const currentDefenderHp = defenderHp - damage;
+    if (currentDefenderHp <= 0) return attacker;
+    const updatedDefender = assoc('hp', currentDefenderHp, defender);
+    return this.#fightOutcome(updatedDefender, attacker);
+  }
+
+  #fight(attacker, defender) {
+    const winner = this.#fightOutcome(attacker, defender);
+    return {
+      winnerId: winner.id,
+      atkId: attacker.id,
+      defId: defender.id,
+    };
+  }
+
+  #createFights(pokemons) {
+    return pipe(
+      sort(() => Math.random() - 0.5),
+      splitEvery(2),
+    )(pokemons);
+  }
+
+  #getRoundOutCome(pokemons) {
+    const fights = this.#createFights(pokemons);
+    const roundOutCome = map(([attacker, defender]) => {
+      return this.#fight(attacker, defender);
+    }, fights);
+    return roundOutCome;
   }
 }

@@ -7,9 +7,10 @@ A simple JavaScript API built using **nestjs** framework, **postgres** database 
 ### Folders:
 - **assets**: Static files. Holds the csv used to seed the db.
 - **auth**: Holds all logic related to the **Authentication** and **Authorization** using [Passport](http://www.passportjs.org/)
-- **common**: Holds logic that could be used across the api regardless of the entities.
+- **common**: Holds logic that could be used across the code.
  - **pipes**: Holds logic for pipes used in the controllers.
     - joi: Validates a request input using [Joi](https://joi.dev/api/?v=17.7.0). This approach was used because DTOs definition didn't work with JavaScript and needed a way to validate user's input.
+  - **math**: math related functions.
 - **database**: Holds migration, schema, seed files.
 - **entities**: Holds nestjs components along with any joi schemas needs to validate an input. We only have two entities in the api **users** and **pokemons**.
 - **guards**: Mostly used to wrap guards provided by Passport instead of calling them by name.
@@ -20,6 +21,38 @@ A simple JavaScript API built using **nestjs** framework, **postgres** database 
 - **GET** /pokemons*?page=#&limit=#*: returns a list pokemons details. The endpointaccepts two query params *page* and *limit* default values are *1* and *10*.
 - **GET** /pokemons/*id*: fetches a specific pokemon by id.
 - **GET** /pokemons/damage*?atkId&defId*: retruns the possible damage. Both Ids are required.
+- - **POST** pokemons/ringFight: returns rounds and the winner of each fight. 
+  - Body: 
+  -```json
+  {
+    "ids: [1,2, 3, 4]
+  }
+   ```
+   - Response: 
+  -```json
+  {
+    "2": [
+        {
+            "winnerId": 4,
+            "atkId": 3,
+            "defId": 4
+        }
+    ],
+    "4": [
+        {
+            "winnerId": 4,
+            "atkId": 1,
+            "defId": 4
+        },
+        {
+            "winnerId": 3,
+            "atkId": 2,
+            "defId": 3
+        }
+    ]
+}
+   ```
+
 - **POST** auth/login: returns jwt token for a user. 
   - Body: **Database will be seeded with the following user**
   -```json

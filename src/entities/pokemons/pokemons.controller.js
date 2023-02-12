@@ -5,14 +5,16 @@ import {
   DefaultValuePipe,
   Dependencies,
   Get,
+  HttpCode,
   Param,
   ParseIntPipe,
+  Post,
   Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
 import { PokemonService } from './pokemons.service';
-import { UpdatePokemonSchema } from './pokemons.schema';
+import { RingFightSchema, UpdatePokemonSchema } from './pokemons.schema';
 import { JoiValidationPipe } from '../../common/pipes/joi';
 import { JwtAuthGuard } from '../../guards/jwt.guard';
 
@@ -28,6 +30,13 @@ export class PokemonController {
   @Bind(Query('atkId', ParseIntPipe), Query('defId', ParseIntPipe))
   async getDamage(atkId, defId) {
     return this.pokemonService.getDamage(atkId, defId);
+  }
+
+  @Post('/ring-fight')
+  @HttpCode(200)
+  @Bind(Body(new JoiValidationPipe(RingFightSchema)))
+  async ringFight(input) {
+    return this.pokemonService.ringFight(input.ids);
   }
 
   @Get(':id')
