@@ -1,3 +1,4 @@
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { PrismaService } from '../../providers/prisma/prisma.service';
 import { PokemonController } from './pokemons.controller';
@@ -40,12 +41,14 @@ describe('PokemonController', () => {
       expect(await pokemonController.findUnique(1)).toBe(pokemons[0]);
     });
 
-    test('should not return a pokemon', async () => {
+    test('should throw an error', async () => {
       jest
         .spyOn(pokemonService, 'findUnique')
         .mockImplementation(id => pokemons.find(p => p.id === id));
 
-      expect(await pokemonController.findUnique(3)).not.toBeDefined();
+      await expect(pokemonController.findUnique(30)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -56,6 +59,16 @@ describe('PokemonController', () => {
         .mockImplementation(() => pokemons.slice(0, 2));
 
       expect(await pokemonController.getDamage(1, 2)).toBe(60);
+    });
+
+    test('should throw an error', async () => {
+      jest
+        .spyOn(pokemonService, 'findByIds')
+        .mockImplementation(() => pokemons);
+
+      await expect(pokemonController.getDamage(1, 22)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -83,6 +96,16 @@ describe('PokemonController', () => {
           4: expect.anything(Array),
         }),
       );
+    });
+
+    test('should throw an error', async () => {
+      jest
+        .spyOn(pokemonService, 'findByIds')
+        .mockImplementation(() => [pokemons.slice(0, 1)]);
+
+      await expect(
+        pokemonController.ringFight({ ids: [1, 2] }),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 });

@@ -2,6 +2,7 @@ import { Dependencies, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../providers/prisma/prisma.service';
 import { createDetailsObject } from './pokemons.helper';
 import { assoc, pipe, pluck, sort, splitEvery, map } from 'ramda';
+import { isPowerOf2 } from '../../common/math';
 
 @Injectable()
 @Dependencies(PrismaService)
@@ -34,8 +35,10 @@ export class PokemonService {
 
   async getDamage(attackerId, defenderId) {
     const pokemons = await this.findByIds([attackerId, defenderId]);
-    const details = createDetailsObject(pokemons);
+    if (pokemons.length != 2)
+      throw new Error('One of the provided ids is not found');
 
+    const details = createDetailsObject(pokemons);
     return this.#possibleDamage(details[attackerId], details[defenderId]);
   }
 
@@ -44,7 +47,7 @@ export class PokemonService {
     const { typeOne: defType, defense } = defender;
     const typeModifier = this.#getTypeModifier(atkType, defType);
 
-    return 30 * (attack / defense) * typeModifier;
+    return Math.floor(30 * (attack / defense) * typeModifier);
   }
 
   #getTypeModifier(atkType, defType) {
@@ -59,6 +62,9 @@ export class PokemonService {
 
   async ringFight(ids) {
     let pokemons = await this.findByIds(ids);
+    if (!isPowerOf2(pokemons.length))
+      throw new Error('Number of found ids must be a power of 2');
+
     const details = createDetailsObject(pokemons);
     let round = pokemons.length;
     const results = {};

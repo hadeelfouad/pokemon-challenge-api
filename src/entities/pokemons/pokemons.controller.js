@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Bind,
   Body,
   Controller,
@@ -6,6 +7,7 @@ import {
   Dependencies,
   Get,
   HttpCode,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Post,
@@ -29,20 +31,30 @@ export class PokemonController {
   @Get('/damage')
   @Bind(Query('atkId', ParseIntPipe), Query('defId', ParseIntPipe))
   async getDamage(atkId, defId) {
-    return this.pokemonService.getDamage(atkId, defId);
+    try {
+      return await this.pokemonService.getDamage(atkId, defId);
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
   }
 
   @Post('/ring-fight')
   @HttpCode(200)
   @Bind(Body(new JoiValidationPipe(RingFightSchema)))
   async ringFight(input) {
-    return this.pokemonService.ringFight(input.ids);
+    try {
+      return await this.pokemonService.ringFight(input.ids);
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
   }
 
   @Get(':id')
   @Bind(Param('id', ParseIntPipe))
-  findUnique(id) {
-    return this.pokemonService.findUnique(id);
+  async findUnique(id) {
+    const pokemon = await this.pokemonService.findUnique(id);
+    if (pokemon) return pokemon;
+    throw new NotFoundException('Id not found');
   }
 
   @Put()

@@ -21,7 +21,7 @@ A simple JavaScript API built using **nestjs** framework, **postgres** database 
 - **GET** /pokemons*?page=#&limit=#*: returns a list pokemons details. The endpointaccepts two query params *page* and *limit* default values are *1* and *10*.
 - **GET** /pokemons/*id*: fetches a specific pokemon by id.
 - **GET** /pokemons/damage*?atkId&defId*: retruns the possible damage. Both Ids are required.
-- - **POST** pokemons/ringFight: returns rounds and the winner of each fight. 
+- - **POST** pokemons/ringFight: returns rounds and the winner of each fight. Passed ids must be unique. 
   - Body: 
   -```json
   {
@@ -97,6 +97,6 @@ $ npm run test:cov
 ```
 ## Possible Enhancements:
 - Use TypeScript instead as the framework is tailored for it. This will allow us to make use of DTOs and remove the JoiValidationPipe.
-- Better response in case a pokemon is not found.
-- Custom errors. 
+- Custom errors in PokemonService class. 
 - Test the modules as a whole. 
+- Mock injected instances instead of spying on them in the tests.
